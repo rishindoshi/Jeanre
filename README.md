@@ -1,3 +1,3 @@
 # Jeanre
 
-An SVM music genre classifier written in python :)
+An SVM music genre classifier written in python :(

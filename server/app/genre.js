@@ -1,6 +1,12 @@
 var Q = require('q');
 var request = require('request-promise');
 
+// For Scott
+exports.spawnChildProcess = function() {
+	// Spawn a python child process
+	// read file or simple print statement
+};
+
 exports.testFeatures = function(api) {
 	var deferred = Q.defer();
 

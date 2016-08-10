@@ -1,6 +1,6 @@
 var Q = require('q');
 var jsonfile = require('jsonfile');
-var genre = require('./genre');
+var classifier = require('./genre');
 
 module.exports = function(app, api) {
 	function loggedIn(req, res, next) {
@@ -21,7 +21,9 @@ module.exports = function(app, api) {
 	});
 
 	app.get('/', loggedIn, function(req, res) {
-		genre.testFeatures(api);
+		var genres = ["Party", "Indie", "Hip Hop"];
+
+		classifier.getTracks(genres, api);
 
 		res.render('home', {
 			user: req.user.id,

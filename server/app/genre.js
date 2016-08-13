@@ -7,10 +7,10 @@ exports.spawnChildProcess = function() {
 	// read file or simple print statement
 };
 
-exports.testFeatures = function(api) {
+exports.getTrackFeatures = function(trackId, api) {
 	var deferred = Q.defer();
+	var req_url = "https://api.spotify.com/v1/audio-features/" + trackId;
 
-	var req_url = "https://api.spotify.com/v1/audio-features/06AKEBrKUckW0KREUWRnvT";
 	var rel_req_options = {
 		url: req_url,
 		headers: {
@@ -19,29 +19,62 @@ exports.testFeatures = function(api) {
 	};
 
 	request(rel_req_options)
-		.then(function(res) {
-			var data = JSON.parse(res);
-			console.log(data);
+		.then(function(res){
+			deferred.resolve(JSON.parse(res));
 		})
-		.catch(function(err) {
+		.catch(function(err){
 			console.log(err);
 		});
-};
 
-exports.getTrackId = function(trackName, api) {
-	console.log("getTrackId");
-};
+	return deferred.promise;
+}
 
-exports.getTrackFeatures = function(trackId, api) {
-	console.log("getTrackFeatures");
-};
-
-exports.getPlaylistTracks = function(pId. api) {
-	console.log("getPlaylistTracks");
-};
-
-exports.getGenreTracks = function(genreId, api) {
+exports.getTracksFeatures = function(trackIds, api) {
 	var self = this;
+	var deferred = Q.defer();
+	var promiseArray = [];
+	for (var i = 0; i < trackIds.length; ++i) {
+		promiseArray.push(self.getTrackFeatures(trackIds[i], api));
+	}
+
+	var allFeatures = [];
+	Q.all(promiseArray).done(function(values){
+		deferred.resolve(values);
+	});
+
+	return deferred.promise;
+};
+
+exports.getPlaylistTracks = function(userId, pId, api) {
+	var deferred = Q.defer();
+	var self = this;
+	var req_url = "https://api.spotify.com/v1/users/" + userId + "/playlists/" + pId + "/tracks";
+	var rel_req_options = {
+		url: req_url,
+		headers: {
+			'Authorization': 'Bearer ' + api.getAccessToken()
+		}
+	};
+
+	var trackIds = [];
+	request(rel_req_options)
+		.then(function(res){
+			var data = JSON.parse(res);
+			var tracks = data.items;
+			for (var i = 0; i < tracks.length; ++i) {
+				trackIds.push(tracks[i].track.id);
+			}
+			deferred.resolve(trackIds);
+		})
+		.catch(function(err){
+			console.log(err);
+		});
+
+	return deferred.promise;
+};
+
+exports.getGenrePlaylistIds = function(genreId, api) {
+	var deferred = Q.defer();
 	var req_url = "https://api.spotify.com/v1/browse/categories/";
 	var rel_req_options = {
 		url: req_url + genreId + "/playlists",
@@ -54,20 +87,27 @@ exports.getGenreTracks = function(genreId, api) {
 		.then(function(res){
 			var data = JSON.parse(res);
 			var playlists = data.playlists.items;
-			var playlistId;
+
 			for (var i = 0; i < playlists.length; ++i) {
-				playlistId = playlists[i].id;
-				self.getPlaylistTracks(playlistId, api);
+				var playlistId = playlists[i].id;
+				var userId = playlists[i].owner.id;
+				deferred.resolve({
+					uId: userId,
+					pId: playlistId
+				});
 				break;
 			}
 		})
 		.catch(function(err){
 			console.log(err);
 		});
+
+	return deferred.promise;
 };
 
 
-exports.getTracks = function(genres, api) {
+exports.getFeatures = function(genres, api) {
+	var deferred = Q.defer();
 	var self = this;
 	var req_url = "https://api.spotify.com/v1/browse/categories";
 	var rel_req_options = {
@@ -84,19 +124,28 @@ exports.getTracks = function(genres, api) {
 
 			for (var i = 0; i < items.length; ++i) {
 				if (genres.indexOf(items[i].name) > -1) {
-					self.getGenreTracks(items[i].id, api);
+					console.log("Choosing songs for " + items[i].name + " genre");
+					return self.getGenrePlaylistIds(items[i].id, api);
 					break;
 				}
 			}
 		})
+		.then(function(pObj){
+			return self.getPlaylistTracks(pObj.uId, pObj.pId, api);
+		})
+		.then(function(trackIds){
+			return self.getTracksFeatures(trackIds, api);
+		})
+		.then(function(featureArray){
+			deferred.resolve(featureArray);
+		})
 		.catch(function(err){
 			console.log(err);
 		});
+
+	return deferred.promise;
 };
 
-exports.formatFeatureData = function(features) {
-	console.log("formatFeatureData");
-};
 
 
 

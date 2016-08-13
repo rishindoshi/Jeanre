@@ -23,7 +23,13 @@ module.exports = function(app, api) {
 	app.get('/', loggedIn, function(req, res) {
 		var genres = ["Party", "Indie", "Hip Hop"];
 
-		classifier.getTracks(genres, api);
+		classifier.getFeatures(genres, api)
+			.then(function(featureArray){
+				console.log(featureArray);
+			})
+			.catch(function(err){
+				console.log(err);
+			});
 
 		res.render('home', {
 			user: req.user.id,

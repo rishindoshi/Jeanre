@@ -23,7 +23,16 @@ module.exports = function(app, api) {
 	app.get('/', loggedIn, function(req, res) {
 		var genres = ["Party", "Indie", "Hip Hop"];
 
-		classifier.getTracks(genres, api);
+		for (var i = 0; i < genres.length; ++i) {
+			classifier.getFeatures(genres[i], api)
+				.then(function(featureArray){
+					var path = "/Users/rishindoshi/Documents/College/Projects/Jeanre/classification/training_data/";
+					classifier.writeFeatureToFile(path, genres[i], featureArray);
+				})
+				.catch(function(err){
+					console.log(err);
+				});
+		}
 
 		res.render('home', {
 			user: req.user.id,

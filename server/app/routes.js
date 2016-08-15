@@ -1,6 +1,7 @@
 var Q = require('q');
 var jsonfile = require('jsonfile');
 var classifier = require('./genre');
+var genres = [{genre:"Party"}, {genre:"Rock"}, {genre:"Hip Hop"}, {genre:"Chill"}, {genre:"Country"}];
 
 module.exports = function(app, api) {
 	function loggedIn(req, res, next) {
@@ -20,22 +21,21 @@ module.exports = function(app, api) {
 		res.redirect('/');
 	});
 
+	app.get('/classify', function(req, res) {
+		var genre = req.query.genre;
+		classifier.getFeatures(genre, api)
+			.then(function(featureArray){
+				var path = "/Users/rishindoshi/Documents/College/Projects/Jeanre/classification/training_data/";
+				classifier.writeFeatureToFile(path, genre, featureArray);
+			})
+			.catch(function(err){
+				console.log(err);
+			});
+	})
+
 	app.get('/', loggedIn, function(req, res) {
-		var genres = ["Party", "Indie", "Hip Hop"];
-
-		for (var i = 0; i < genres.length; ++i) {
-			classifier.getFeatures(genres[i], api)
-				.then(function(featureArray){
-					var path = "/Users/rishindoshi/Documents/College/Projects/Jeanre/classification/training_data/";
-					classifier.writeFeatureToFile(path, genres[i], featureArray);
-				})
-				.catch(function(err){
-					console.log(err);
-				});
-		}
-
 		res.render('home', {
-			user: req.user.id,
+			genres: genres,
 		});
 	});
 

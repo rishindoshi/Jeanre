@@ -90,7 +90,7 @@ exports.getPlaylistsTracks = function(pObjs, api) {
 		for (var i = 0; i < values.length; ++i) {
 			allTrackIds = allTrackIds.concat(values[i]);
 		}
-		deferred.resolve(allTrackIds.slice(0, 60));
+		deferred.resolve(allTrackIds.slice(0, 80));
 	});
 
 	return deferred.promise;
@@ -200,6 +200,29 @@ exports.getFeatures = function(genre, api) {
 			deferred.resolve(formattedFeatures);
 		})
 		.catch(function(err){
+			console.log(err);
+		});
+
+	return deferred.promise;
+};
+
+exports.printGenres = function(api) {
+	var deferred = Q.defer();
+	var self = this;
+	var req_url = "https://api.spotify.com/v1/browse/categories";
+	var rel_req_options = {
+		url: req_url,
+		headers: {
+			'Authorization': 'Bearer ' + api.getAccessToken()
+		}
+	};
+
+	request(rel_req_options)
+		.then(function(res) {
+			var data = JSON.parse(res);
+			console.log(data.categories.items);
+		})
+		.catch(function(err) {
 			console.log(err);
 		});
 

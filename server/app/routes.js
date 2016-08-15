@@ -23,19 +23,16 @@ module.exports = function(app, api) {
 	app.get('/', loggedIn, function(req, res) {
 		var genres = ["Party", "Indie", "Hip Hop"];
 
-		classifier.getFeatures(genres, api)
-			.then(function(featureArray){
-				// We now have an array of feature objects
-				// Iterate through the array and filter each object to only include relevent features
-				// e.g Exclude keys such as (uri, duration, etc.)
-				// Then write the features to a file using node streams
-				// Then spawn child python process to classify input song
-				// Calculate percent accuracy and render results to front-end
-				console.log(featureArray);
-			})
-			.catch(function(err){
-				console.log(err);
-			});
+		for (var i = 0; i < genres.length; ++i) {
+			classifier.getFeatures(genres[i], api)
+				.then(function(featureArray){
+					var path = "/Users/rishindoshi/Documents/College/Projects/Jeanre/classification/training_data/";
+					classifier.writeFeatureToFile(path, genres[i], featureArray);
+				})
+				.catch(function(err){
+					console.log(err);
+				});
+		}
 
 		res.render('home', {
 			user: req.user.id,

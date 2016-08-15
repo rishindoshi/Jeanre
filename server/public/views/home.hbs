@@ -1,11 +1,13 @@
 <div class="center top-buffer">
-	<h1 class="title bump">{{user}}</h1>
 	<h3 id="text" class="bump"></h3>
+	{{#each genres}}
+		<a href="/classify?genre={{genre}}"> <button> {{genre}} </button></a>
+	{{/each}}
 </div>
 {{!-- <div id="overlay" class="gone">
 	<div class="outerlay">
 		<div class="loading">
-			<h1>Classifying your song</h1>
+			<h1>Training some datas</h1>
 			<div class="spinner">
 				<div class="rect1"></div>
 				<div class="rect2"></div>

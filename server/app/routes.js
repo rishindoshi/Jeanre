@@ -1,7 +1,7 @@
 var Q = require('q');
 var jsonfile = require('jsonfile');
 var classifier = require('./genre');
-var genres = [{genre:"Party"}, {genre:"Indie"}, {genre:"Hip Hop"}];
+var genres = [{genre:"Party"}, {genre:"Rock"}, {genre:"Hip Hop"}, {genre:"Chill"}, {genre:"Country"}];
 
 module.exports = function(app, api) {
 	function loggedIn(req, res, next) {

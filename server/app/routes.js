@@ -34,6 +34,8 @@ module.exports = function(app, api) {
 	})
 
 	app.get('/', loggedIn, function(req, res) {
+		classifier.spawnChildProcess();
+
 		res.render('home', {
 			genres: genres,
 		});

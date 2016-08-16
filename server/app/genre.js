@@ -1,17 +1,20 @@
 var Q = require('q');
 var request = require('request-promise');
 var fs = require('fs');
+var spawn = require('child_process').spawn
 
-// For Scott
 exports.spawnChildProcess = function() {
-	// Spawn a python child process
-	// read file or simple print statement
+	var py = spawn('python', ['/Users/rishindoshi/Documents/College/Projects/Jeanre/server/app/test.py']);
+
+	py.stdout.on('data', function(data){
+  		var dataString = data.toString();
+  		console.log(dataString);
+	});
 };
 
 exports.getTrackFeatures = function(trackId, api) {
 	var deferred = Q.defer();
 	var req_url = "https://api.spotify.com/v1/audio-features/" + trackId;
-
 	var rel_req_options = {
 		url: req_url,
 		headers: {
